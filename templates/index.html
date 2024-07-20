@@ -1,0 +1,93 @@
+{% load static %}
+{% load index %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<header>
+    <div class="site-header">
+			<a href="index.html" class="branding">
+				<img src="{% static 'images/logo.png' %}" alt="Логотип" class="logo">
+				<div class="logo-type">
+					<h1 class="site-title">Приложение погоды</h1>
+				</div>
+			</a>
+
+			<div class="main-navigation">
+				<ul class="menu">
+					<li class="menu-item current-menu-item"><a href="{% url 'index' %}">Погода</a></li>
+{#					<li class="menu-item"><a href="{% url 'contacts' %}">Контакты</a></li>#}
+				</ul>
+			</div>
+    </div>
+</header>
+<body>
+    <div class="site-content" style="background-image: url('{% static 'images/banner.png' %}')">
+		<div class="search">
+			<form action="{% url 'index' %}" class="find-location" method="get">
+				<input type="text" placeholder="Введите город" id="city" name="city" autocomplete="off" required>
+				<input type="submit" value="Поиск">
+				<input type="hidden" name="lat" id="lat">
+				<input type="hidden" name="lon" id="lon">
+
+			</form>
+            <div id="suggestions-container" class="autocomplete-suggestions" style="display: none"></div>
+
+		</div>
+		<div class="forecast-table">
+            {% for forecast in forecasts_week %}
+                <div class="{% if forloop.first %}select-f{% endif %} forecast" id="forecast{{ forloop.counter }}">
+                    <div class="forecast-header">
+                        {% if forloop.first %}
+                        <div class="day">{{ forecast.day }}</div>
+                        <div class="day-short"  style="display: none">{{ forecast.day_short }}</div>
+                        {% else %}
+                        <div class="day" style="display: none">{{ forecast.day }}</div>
+                        <div class="day-short"  >{{ forecast.day_short }}</div>
+                        {% endif %}
+                        <div class="date">{{ forecast.date }}</div>
+                    </div> <!-- .forecast-header -->
+                    <div class="forecast-content">
+                        <div class="location" {% if not forloop.first %}style="display: none"{% endif %}>{{ city }}</div>
+                        <div class="degree">
+                            <div class="night-temp" {% if forloop.first %}style="display: none"{% endif %}>{{ forecast.temp_max }}<sup>o</sup>C</div>
+                            <div class="num">{{ forecast.temp_min }}<sup>o</sup>C</div>
+                            <div class="forecast-icon">
+                                <img src="{% static 'images/icons/' %}{{ forecast.weather }}.svg" alt="Иконка погоды" width=90>
+                            </div>
+                        </div>
+                        <div class="wind-rain" {% if not forloop.first %}style="display: none"{% endif %}>
+                            <span><img src="{% static 'images/icon-umberella.png' %}" alt="">{{ forecast.rain }}%</span>
+                            <span><img src="{% static 'images/icon-wind.png' %}" alt="">{{ forecast.wind_speed }}км/ч</span>
+                            <span><img src="{% static 'images/icon-compass.png' %}" alt="">{{ forecast.wind_dir }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% for day_forecast in forecasts_24 %}
+		<div class="day-forecast" id="forecast{{ forloop.counter }}-day" {% if not forloop.first %}style="display: none"{% endif %}>
+			<div class="hour-forecast-table">
+                {% for i in times %}
+				<div class="forecast-h">
+					<div class="degree-h">{{ day_forecast.temps|index:i }}<sup>o</sup>C</div>
+					<div class="weather"><img src="{% static 'images/icons'%}/{{ day_forecast.weather_codes|index:i }}.svg" alt=""></div>
+					<div class="wind">{{ day_forecast.wind_dirs|index:i }}:{{ day_forecast.wind_speeds|index:i }}км/ч</div>
+					<div class="time">{{ day_forecast.dates|index:i }}</div>
+				</div>
+                {% endfor %}
+			</div>
+		</div>
+        {% endfor %}
+        </div>
+
+</body>
+<footer>
+	<script src="{% static 'js/jquery/jquery-3.7.1.min.js' %}"></script>
+	<script src="{% static 'js/scripts.js' %}"></script>
+</footer>
+</html>
